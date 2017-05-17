@@ -28,7 +28,7 @@
         } kind;
         union {
             struct {A_fun fun1, fun2;} compound;
-            struct {int type; char* name; A_stm stm1, stm2;} single;
+            struct {int type; char* id; A_stm stm1, stm2;} single;
         } u;
     };
     A_fun A_CompoundFun (A_fun fun1, A_fun fun2) {
@@ -38,11 +38,13 @@
         result -> u.compound.fun2 = fun2;
         return result;
     }
-    A_fun A_SingleFun (int type, char* name, A_stm stm1, A_stm stm2) {
+    A_fun A_SingleFun (int type, char* id, A_stm stm1, A_stm stm2) {
         A_fun result = (A_fun)malloc(sizeof(struct A_fun_));
         result -> kind = A_fun_::A_singleFun;
         result -> u.single.type = type;
-        result -> u.single.name = name;
+        result -> u.single.id = (char*)malloc((strlen(id) + 1) * sizeof(char));
+        strcpy (result -> u.single.id, id);
+        printf("%s\n", result -> u.single.id);
         result -> u.single.stm1 = stm1;
         result -> u.single.stm2 = stm2;
         return result;
@@ -84,7 +86,8 @@
     A_stm A_AssignStm (char* id, A_exp exp) {
         A_stm result = (A_stm)malloc(sizeof(struct A_stm_));
         result -> kind = A_stm_::A_assignStm;
-        result -> u.assign.id = id;
+        result -> u.assign.id = (char*)malloc((strlen(id) + 1) * sizeof(char));
+        strcpy (result -> u.assign.id, id);
         result -> u.assign.exp = exp;
         return result;
     }
@@ -134,7 +137,8 @@
     A_stm A_CallStm (char* id, A_expList expList) {
         A_stm result = (A_stm)malloc(sizeof(struct A_stm_));
         result -> kind = A_stm_::A_callStm;
-        result -> u.call.id = id;
+        result -> u.call.id = (char*)malloc((strlen(id) + 1) * sizeof(char));
+        strcpy (result -> u.call.id, id);
         result -> u.call.expList = expList;
         return result;
     }
@@ -158,28 +162,32 @@
     A_exp A_IntExp (char* con) {
         A_exp result = (A_exp)malloc(sizeof(struct A_exp_));
         result -> kind = A_exp_::A_const;
-        result -> u._const.value = con;
+        result -> u._const.value = (char*)malloc((strlen(con) + 1) * sizeof(char));
+        strcpy (result -> u._const.value, con);
         result -> u._const.vkind = A_exp_::uu::consts::A_int;
         return result;
     }
     A_exp A_DoubleExp (char* con) {
         A_exp result = (A_exp)malloc(sizeof(struct A_exp_));
         result -> kind = A_exp_::A_const;
-        result -> u._const.value = con;
+        result -> u._const.value = (char*)malloc((strlen(con) + 1) * sizeof(char));
+        strcpy (result -> u._const.value, con);
         result -> u._const.vkind = A_exp_::uu::consts::A_double;
         return result;
     }
     A_exp A_CharExp (char* con) {
         A_exp result = (A_exp)malloc(sizeof(struct A_exp_));
         result -> kind = A_exp_::A_const;
-        result -> u._const.value = con;
+        result -> u._const.value = (char*)malloc((strlen(con) + 1) * sizeof(char));
+        strcpy (result -> u._const.value, con);
         result -> u._const.vkind = A_exp_::uu::consts::A_char;
         return result;
     }
     A_exp A_IdExp (char* id) {
         A_exp result = (A_exp)malloc(sizeof(struct A_exp_));
         result -> kind = A_exp_::A_variable;
-        result -> u.variable.id = id;
+        result -> u.variable.id = (char*)malloc((strlen(id) + 1) * sizeof(char));
+        strcpy (result -> u.variable.id, id);
         return result;
     }
     A_exp A_OpExp (A_exp exp1, int op, A_exp exp2) {
@@ -196,7 +204,8 @@
     A_exp A_ArrayExp (char* id, char* num) {
         A_exp result = (A_exp)malloc(sizeof(struct A_exp_));
         result -> kind = A_exp_::A_arrayVar;
-        result -> u._array.id = id;
+        result -> u._array.id = (char*)malloc((strlen(id) + 1) * sizeof(char));
+        strcpy (result -> u._array.id, id);
         result -> u._array.num = num;
         return result;
     }
