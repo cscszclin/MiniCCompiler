@@ -6,10 +6,9 @@ enum {
 ASSIGN,  LT,      EQ,      GT,      LE,      GE,      NE,      IF,      ELSE, 	NUMBER,	PLUS, 	MINUS, 	TIMES, 	DIVIDE,
 FOR, 	WHILE, 	LP,      RP,      LB,      RB,      LBB, 	RBB,     EQUAL,   HEAD,   
 SEMI,    COMMA,   PRINT,   INT,     DOUBLE,  CHAR,    END,     BREAK,   RETURN,  DPLUS,   DMINUS, VOID
-
-
 }
 */
+
 %}
 enter 		\n
 blank 		[ \t]+
