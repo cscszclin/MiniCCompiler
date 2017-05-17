@@ -28,7 +28,7 @@
         } kind;
         union {
             struct {A_fun fun1, fun2;} compound;
-            struct {int type; char* name; A_expList expList; A_stm stm;} single;
+            struct {int type; char* name; A_stm stm1, stm2;} single;
         } u;
     };
     A_fun A_CompoundFun (A_fun fun1, A_fun fun2) {
@@ -38,13 +38,13 @@
         result -> u.compound.fun2 = fun2;
         return result;
     }
-    A_fun A_SingleFun (int type, char* name, A_expList expList, A_stm stm) {
+    A_fun A_SingleFun (int type, char* name, A_stm stm1, A_stm stm2) {
         A_fun result = (A_fun)malloc(sizeof(struct A_fun_));
         result -> kind = A_fun_::A_singleFun;
         result -> u.single.type = type;
         result -> u.single.name = name;
-        result -> u.single.expList = expList;
-        result -> u.single.stm = stm;
+        result -> u.single.stm1 = stm1;
+        result -> u.single.stm2 = stm2;
         return result;
     }
 
@@ -244,7 +244,7 @@ ASSIGN  LT      EQ      GT      LE      GE      NE      IF      ELSE 	NUMBER 	PL
 FOR 	WHILE 	LP      RP      LB      RB      LBB 	RBB     EQUAL   HEAD    VOID   
 SEMI    COMMA   PRINT   INT     DOUBLE  CHAR    END     BREAK   RETURN  DPLUS   DMINUS
 %token <id> ID INTIN DOUBLEIN CHARIN 
-%type <stm> stm 
+%type <stm> stm para
 %type <exp> exp exp1 exp2 exp3
 %type <expList> exps
 %type <fun> fun prog
@@ -253,23 +253,29 @@ SEMI    COMMA   PRINT   INT     DOUBLE  CHAR    END     BREAK   RETURN  DPLUS   
 prog: fun {printf("Syntax tree created!\n");};
 fun : fun fun {$$=A_CompoundFun($1,$2);};
 
-fun : INT ID LP exps RP LBB stm RBB {$$=A_SingleFun(0,$2,$4,$7);}
-    | DOUBLE ID LP exps RP LBB stm RBB {$$=A_SingleFun(1,$2,$4,$7);}
-    | CHAR ID LP exps RP LBB stm RBB {$$=A_SingleFun(2,$2,$4,$7);}
-    | VOID ID LP exps RP LBB stm RBB {$$=A_SingleFun(3,$2,$4,$7);}
+fun : INT ID LP para RP LBB stm RBB {$$=A_SingleFun(0,$2,$4,$7);}
+    | DOUBLE ID LP para RP LBB stm RBB {$$=A_SingleFun(1,$2,$4,$7);}
+    | CHAR ID LP para RP LBB stm RBB {$$=A_SingleFun(2,$2,$4,$7);}
+    | VOID ID LP para RP LBB stm RBB {$$=A_SingleFun(3,$2,$4,$7);}
     | INT ID LP RP LBB stm RBB {$$=A_SingleFun(0,$2,NULL,$6);}
     | DOUBLE ID LP RP LBB stm RBB {$$=A_SingleFun(1,$2,NULL,$6);}
     | CHAR ID LP RP LBB stm RBB {$$=A_SingleFun(2,$2,NULL,$6);};
     | VOID ID LP RP LBB stm RBB {$$=A_SingleFun(3,$2,NULL,$6);};
+
+para: para COMMA para {$$=A_CompoundStm($1,$3);}
+    | INT exp {A_expList explist=A_ExpList($2,NULL); $$=A_DefineStm(0,explist);}
+    | DOUBLE exp {A_expList explist=A_ExpList($2,NULL); $$=A_DefineStm(1,explist);}
+    | CHAR exp {A_expList explist=A_ExpList($2,NULL); $$=A_DefineStm(2,explist);};
+
 stm : LBB stm RBB {$$=$2;};
 stm : stm SEMI stm {$$=A_CompoundStm($1,$3);}
     | stm stm {$$=A_CompoundStm($1,$2);};
-
 stm : ID ASSIGN exp {$$=A_AssignStm($1,$3);};
 stm : PRINT exps{$$=A_PrintStm($2);};
 stm : RETURN exps {$$=A_ReturnStm($2);};
 stm : ID LP exps RP {$$=A_CallStm($1,$3);}
     | ID LP RP {$$=A_CallStm($1,NULL);};
+
 
 stm : IF LP exp RP LBB stm RBB {$$=A_IfStm($3,$6,NULL);}
     | IF LP exp RP LBB stm RBB ELSE LBB stm RBB {$$=A_IfStm($3,$6,$10);};
